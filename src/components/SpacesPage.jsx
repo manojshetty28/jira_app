@@ -60,7 +60,7 @@ export default function SpacesPage() {
     key: p.key,
     type: getProjectType(p),
     lead: p.lead ? { name: p.lead.displayName, avatar: p.lead.avatarUrls?.['48x48'] } : null,
-    url: `https://${import.meta.env.VITE_JIRA_DOMAIN || 'manojcursoragentapp.atlassian.net'}/browse/${p.key}`,
+    url: `https://${import.meta.env.VITE_JIRA_DOMAIN ?? 'manojcursoragentapp.atlassian.net'}/browse/${p.key}`,
   }))
 
   return (

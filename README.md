@@ -1,6 +1,6 @@
 # JIRA Spaces App
 
-React app that displays JIRA Projects (Spaces) from your JIRA Cloud instance.
+React app that displays JIRA Projects (Spaces) from your JIRA Cloud instance. JIRA credentials are kept server-side only (never in the frontend bundle).
 
 ## Setup
 
@@ -11,9 +11,10 @@ React app that displays JIRA Projects (Spaces) from your JIRA Cloud instance.
 
 2. **Configure environment**
    - Copy `.env.example` to `.env`
-   - Set `VITE_JIRA_DOMAIN`, `VITE_JIRA_EMAIL`, and `VITE_JIRA_API_TOKEN`
+   - Set `JIRA_DOMAIN`, `JIRA_EMAIL`, `JIRA_API_TOKEN` (server-side only)
+   - Optionally set `VITE_JIRA_DOMAIN` for project links in the UI
 
-3. **Run dev server**
+3. **Run dev** (starts proxy + Vite)
    ```bash
    npm run dev
    ```
@@ -21,6 +22,8 @@ React app that displays JIRA Projects (Spaces) from your JIRA Cloud instance.
 
 ## Scripts
 
-- `npm run dev` - Start dev server (with JIRA API proxy)
+- `npm run dev` - Start JIRA proxy (port 3001) + Vite dev server (port 5173)
+- `npm run dev:server` - JIRA proxy only
+- `npm run dev:client` - Vite only
 - `npm run build` - Production build
 - `npm run preview` - Preview production build
