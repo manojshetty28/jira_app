@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Environment variables (never commit secrets - JIRA_* are server-side only)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+.cursor
+
+# OS
+.DS_Store
+Thumbs.db
