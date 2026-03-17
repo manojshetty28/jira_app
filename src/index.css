@@ -144,6 +144,15 @@ body {
   text-transform: uppercase;
 }
 
+/* Name, Key, Type, Lead headers only - bold and yellow */
+.spaces-table th.col-name,
+.spaces-table th.col-key,
+.spaces-table th.col-type,
+.spaces-table th.col-lead {
+  font-weight: 700;
+  color: #ffd700;
+}
+
 .spaces-table tbody tr:hover {
   background: #f4f5f7;
 }
