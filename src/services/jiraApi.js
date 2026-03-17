@@ -1,11 +1,15 @@
 /**
  * Fetches projects via server-side proxy. Credentials are never sent to the client.
+ * When query is provided, server iterates all pages for complete search results.
  */
-export async function fetchProjects({ startAt = 0, maxResults = 50 } = {}) {
-  const params = new URLSearchParams({
-    maxResults: String(maxResults),
-    startAt: String(startAt),
-  })
+export async function fetchProjects({ startAt = 0, maxResults = 50, query = '' } = {}) {
+  const params = new URLSearchParams()
+  if (query.trim()) {
+    params.set('q', query.trim())
+  } else {
+    params.set('startAt', String(startAt))
+    params.set('maxResults', String(maxResults))
+  }
   const res = await fetch(`/api/projects?${params}`, {
     headers: { Accept: 'application/json' },
   })

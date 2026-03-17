@@ -27,16 +27,14 @@ export default function SpacesPage() {
     setLoading(true)
     setError(null)
     try {
-      const startAt = search ? 0 : page * PAGE_SIZE
-      const maxResults = search ? 100 : PAGE_SIZE
-      const data = await fetchProjects({ startAt, maxResults })
-      let list = data.values || []
-      if (search.trim()) {
-        const q = search.trim().toLowerCase()
-        list = list.filter((p) => p.name?.toLowerCase().includes(q) || p.key?.toLowerCase().includes(q))
-      }
+      const data = await fetchProjects({
+        startAt: page * PAGE_SIZE,
+        maxResults: PAGE_SIZE,
+        query: search,
+      })
+      const list = data.values || []
       setProjects(list)
-      setTotal(search ? list.length : data.total ?? 0)
+      setTotal(data.total ?? list.length)
     } catch (err) {
       setError(err.message)
       setProjects([])
