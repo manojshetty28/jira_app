@@ -1,8 +1,14 @@
 # Dependencies
 node_modules
+.venv
+__pycache__
+.pytest_cache
 
 # Build output
 dist
+coverage
+htmlcov
+backend_python_app/target
 
 # Environment variables (never commit secrets - JIRA_* are server-side only)
 .env
