@@ -1,71 +1,53 @@
-"""HTTP client helpers for the Metals.dev gold price endpoint."""
-
 import httpx
 
 from backend_python_app.models import GoldPriceResponse
 
 
 class MetalsDevError(Exception):
-    """Raised when Metals.dev cannot provide a valid gold price payload."""
+    pass
 
 
-class MetalsDevClient:
-    """Minimal GET-only client for fetching the latest gold price from Metals.dev."""
+async def fetch_gold_price(
+    api_key: str,
+    base_url: str = "https://api.metals.dev",
+    *,
+    timeout: float = 10.0,
+    transport: httpx.AsyncBaseTransport | None = None,
+) -> GoldPriceResponse:
+    params = {"api_key": api_key, "metal": "gold", "currency": "USD"}
+    try:
+        async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
+            response = await client.get(
+                f"{base_url.rstrip('/')}/v1/metal/spot",
+                params=params,
+                headers={"Accept": "application/json"},
+            )
+    except httpx.HTTPError as exc:
+        raise MetalsDevError("Unable to reach Metals.dev for the latest gold price.") from exc
 
-    def __init__(
-        self,
-        api_key: str,
-        base_url: str = "https://api.metals.dev",
-        timeout: float = 10.0,
-        transport: httpx.AsyncBaseTransport | None = None,
-    ) -> None:
-        self._api_key = api_key
-        self._base_url = base_url.rstrip("/")
-        self._timeout = timeout
-        self._transport = transport
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        # HTTP status wins over JSON parse: error body need not be JSON.
+        if response.is_error:
+            raise MetalsDevError(f"Metals.dev returned HTTP {response.status_code}.") from exc
+        raise MetalsDevError("Metals.dev returned an unreadable response.") from exc
 
-    async def fetch_latest_gold_price(self) -> GoldPriceResponse:
-        params = {
-            "api_key": self._api_key,
-            "metal": "gold",
-            "currency": "USD",
-        }
-        headers = {"Accept": "application/json"}
+    if response.is_error or payload.get("status") == "failure":
+        msg = payload.get("error") or payload.get("message") or "Unable to fetch gold price from Metals.dev."
+        raise MetalsDevError(msg)
 
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout, transport=self._transport) as client:
-                # The integration intentionally uses one outbound GET request and no write operations.
-                response = await client.get(f"{self._base_url}/v1/metal/spot", params=params, headers=headers)
-        except httpx.HTTPError as exc:
-            raise MetalsDevError("Unable to reach Metals.dev for the latest gold price.") from exc
-
-        try:
-            payload = response.json()
-        except ValueError as payload_exc:
-            # HTTP status takes priority: an HTTP error with a non-JSON body is still an upstream failure,
-            # not a parsing bug.
-            if response.is_error:
-                raise MetalsDevError(
-                    f"Metals.dev returned HTTP {response.status_code}."
-                ) from payload_exc
-            raise MetalsDevError("Metals.dev returned an unreadable response.") from payload_exc
-
-        if response.is_error or payload.get("status") == "failure":
-            message = payload.get("error") or payload.get("message") or "Unable to fetch gold price from Metals.dev."
-            raise MetalsDevError(message)
-
-        rate = payload.get("rate") or {}
-        return GoldPriceResponse(
-            source="Metals.dev",
-            metal=payload.get("metal") or "gold",
-            currency=payload.get("currency") or "USD",
-            unit=payload.get("unit") or "toz",
-            timestamp=payload.get("timestamp") or "",
-            price=rate.get("price"),
-            ask=rate.get("ask"),
-            bid=rate.get("bid"),
-            high=rate.get("high"),
-            low=rate.get("low"),
-            change=rate.get("change"),
-            changePercent=rate.get("change_percent"),
-        )
+    rate = payload.get("rate") or {}
+    return GoldPriceResponse(
+        metal=payload.get("metal") or "gold",
+        currency=payload.get("currency") or "USD",
+        unit=payload.get("unit") or "toz",
+        timestamp=payload.get("timestamp") or "",
+        price=rate.get("price"),
+        ask=rate.get("ask"),
+        bid=rate.get("bid"),
+        high=rate.get("high"),
+        low=rate.get("low"),
+        change=rate.get("change"),
+        changePercent=rate.get("change_percent"),
+    )

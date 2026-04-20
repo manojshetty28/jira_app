@@ -1,10 +1,7 @@
-"""Pydantic response models for the gold price API."""
-
 from pydantic import BaseModel
 
 
 class GoldPriceResponse(BaseModel):
-    # This response shape matches the fields already used by the React client.
     source: str = "Metals.dev"
     metal: str = "gold"
     currency: str = "USD"
