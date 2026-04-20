@@ -127,7 +127,7 @@ export default function GoldPricePanel() {
       </div>
 
       {loading ? (
-        <div className="gold-price-panel__loading">Loading latest XAU/USD price...</div>
+        <div className="gold-price-panel__loading">Loading latest gold price...</div>
       ) : isSetupRequired ? (
         <div className="gold-price-panel__setup">
           <p className="gold-price-panel__setup-title">Live gold price is ready to use once the API key is added.</p>
@@ -139,7 +139,7 @@ export default function GoldPricePanel() {
         <>
           <div className="gold-price-panel__hero">
             <div>
-              <p className="gold-price-panel__label">Spot price</p>
+              <p className="gold-price-panel__label">Spot Price</p>
               <div className="gold-price-panel__price">{formatPrice(quote?.price)}</div>
             </div>
             <div className={`gold-price-panel__change ${movementClass}`}>
@@ -165,11 +165,11 @@ export default function GoldPricePanel() {
               <strong>{formatPrice(quote?.ask)}</strong>
             </div>
             <div className="gold-price-panel__stat">
-              <span className="gold-price-panel__label">Day high</span>
+              <span className="gold-price-panel__label">Day High</span>
               <strong>{formatPrice(quote?.high)}</strong>
             </div>
             <div className="gold-price-panel__stat">
-              <span className="gold-price-panel__label">Day low</span>
+              <span className="gold-price-panel__label">Day Low</span>
               <strong>{formatPrice(quote?.low)}</strong>
             </div>
           </div>
