@@ -12,6 +12,7 @@ React app that displays JIRA Projects (Spaces) from your JIRA Cloud instance. JI
 2. **Configure environment**
    - Copy `.env.example` to `.env`
    - Set `JIRA_DOMAIN`, `JIRA_EMAIL`, `JIRA_API_TOKEN` (server-side only)
+   - Set `METALS_DEV_API_KEY` for the live Gold price (USD) panel
    - Optionally set `VITE_JIRA_DOMAIN` for project links in the UI
 
 3. **Run dev** (starts proxy + Vite)

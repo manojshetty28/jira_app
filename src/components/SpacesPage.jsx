@@ -5,6 +5,7 @@ import SearchBar from './SearchBar'
 import FilterDropdown from './FilterDropdown'
 import SpacesTable from './SpacesTable'
 import Pagination from './Pagination'
+import GoldPricePanel from './GoldPricePanel'
 
 const PAGE_SIZE = 50
 
@@ -64,6 +65,7 @@ export default function SpacesPage() {
   return (
     <div className="spaces-page">
       <SpacesHeader />
+      <GoldPricePanel />
       <SearchBar value={search} onChange={setSearch} placeholder="Search spaces" />
       <FilterDropdown />
       {error && <div className="error-banner">{error}</div>}
