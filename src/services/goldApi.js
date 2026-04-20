@@ -5,7 +5,10 @@ export async function fetchGoldPrice() {
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    throw new Error(data.error || 'Unable to load live gold price.')
+    const error = new Error(data.error || 'Unable to load live gold price.')
+    error.code = data.code || 'GOLD_PRICE_REQUEST_FAILED'
+    error.setupHint = data.setupHint || null
+    throw error
   }
 
   return data

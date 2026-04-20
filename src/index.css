@@ -18,6 +18,42 @@ body {
   padding: 24px;
 }
 
+.gold-screen {
+  max-width: 760px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.gold-screen__header {
+  margin-bottom: 20px;
+}
+
+.gold-screen__eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a5d00;
+}
+
+.gold-screen__title {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.05;
+  color: #172b4d;
+}
+
+.gold-screen__subtitle {
+  margin: 10px 0 0;
+  max-width: 560px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #5e6c84;
+}
+
 .gold-price-panel {
   margin-bottom: 24px;
   padding: 20px;
@@ -128,6 +164,23 @@ body {
 .gold-price-panel__loading,
 .gold-price-panel__error {
   padding: 14px 0 4px;
+}
+
+.gold-price-panel__setup {
+  padding: 14px 0 4px;
+}
+
+.gold-price-panel__setup-title {
+  margin: 0;
+  color: #172b4d;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.gold-price-panel__setup-text {
+  margin: 8px 0 0;
+  color: #6b778c;
+  font-size: 14px;
 }
 
 .gold-price-panel__error {
@@ -381,15 +434,19 @@ body {
     padding: 16px;
   }
 
-  .spaces-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .gold-price-panel__header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .gold-screen {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: 28px;
+  }
+
+  .gold-screen__title {
+    font-size: 34px;
   }
 
   .gold-price-panel__price {

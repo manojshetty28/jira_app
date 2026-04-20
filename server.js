@@ -101,7 +101,11 @@ app.get('/api/projects', async (req, res) => {
 
 app.get('/api/gold-price', async (_req, res) => {
   if (!metalsApiKey) {
-    return res.status(500).json({ error: 'Server misconfigured: METALS_DEV_API_KEY required in .env' })
+    return res.status(503).json({
+      error: 'Live gold price is not configured yet.',
+      code: 'METALS_DEV_API_KEY_MISSING',
+      setupHint: 'Add METALS_DEV_API_KEY to .env and restart the dev server.',
+    })
   }
 
   try {

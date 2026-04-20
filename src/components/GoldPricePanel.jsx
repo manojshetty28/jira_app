@@ -39,6 +39,8 @@ export default function GoldPricePanel() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
+  const [isSetupRequired, setIsSetupRequired] = useState(false)
+  const [setupHint, setSetupHint] = useState('')
 
   const loadQuote = useCallback(async ({ silent = false } = {}) => {
     if (silent) {
@@ -51,8 +53,12 @@ export default function GoldPricePanel() {
       const data = await fetchGoldPrice()
       setQuote(data)
       setError(null)
+      setIsSetupRequired(false)
+      setSetupHint('')
     } catch (err) {
       setError(err.message)
+      setIsSetupRequired(err.code === 'METALS_DEV_API_KEY_MISSING')
+      setSetupHint(err.setupHint || '')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -87,7 +93,7 @@ export default function GoldPricePanel() {
           type="button"
           className="gold-price-panel__refresh"
           onClick={() => loadQuote({ silent: true })}
-          disabled={loading || refreshing}
+          disabled={loading || refreshing || isSetupRequired}
         >
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
@@ -95,6 +101,11 @@ export default function GoldPricePanel() {
 
       {loading ? (
         <div className="gold-price-panel__loading">Loading latest XAU/USD price...</div>
+      ) : isSetupRequired ? (
+        <div className="gold-price-panel__setup">
+          <p className="gold-price-panel__setup-title">Live gold price is ready to use once the API key is added.</p>
+          <p className="gold-price-panel__setup-text">{setupHint || 'Add METALS_DEV_API_KEY to .env and restart the dev server.'}</p>
+        </div>
       ) : error ? (
         <div className="gold-price-panel__error">{error}</div>
       ) : (
