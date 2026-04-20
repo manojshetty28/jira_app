@@ -41,8 +41,14 @@ class MetalsDevClient:
 
         try:
             payload = response.json()
-        except ValueError as exc:
-            raise MetalsDevError("Metals.dev returned an unreadable response.") from exc
+        except ValueError as payload_exc:
+            # HTTP status takes priority: an HTTP error with a non-JSON body is still an upstream failure,
+            # not a parsing bug.
+            if response.is_error:
+                raise MetalsDevError(
+                    f"Metals.dev returned HTTP {response.status_code}."
+                ) from payload_exc
+            raise MetalsDevError("Metals.dev returned an unreadable response.") from payload_exc
 
         if response.is_error or payload.get("status") == "failure":
             message = payload.get("error") or payload.get("message") or "Unable to fetch gold price from Metals.dev."

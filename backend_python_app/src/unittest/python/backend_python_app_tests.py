@@ -1,7 +1,9 @@
 """Unit tests for the FastAPI backend and Metals.dev client."""
 
+import importlib.util
 import os
 import unittest
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import httpx
@@ -115,6 +117,17 @@ class MetalsDevClientTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(MetalsDevError, "Unable to reach Metals.dev"):
             await client.fetch_latest_gold_price()
 
+    async def test_fetch_latest_gold_price_raises_for_http_error_with_non_json_body(self) -> None:
+        client = MetalsDevClient(
+            api_key="test-key",
+            transport=httpx.MockTransport(
+                lambda request: httpx.Response(500, text="<html>oops</html>")
+            ),
+        )
+
+        with self.assertRaisesRegex(MetalsDevError, "HTTP 500"):
+            await client.fetch_latest_gold_price()
+
 
 class GoldPriceApiTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -182,4 +195,29 @@ class GoldPriceApiTests(unittest.TestCase):
                 "error": "Metals.dev is temporarily unavailable.",
                 "code": "METALS_DEV_REQUEST_FAILED",
             },
+        )
+
+
+class RunEntrypointTests(unittest.TestCase):
+    def test_main_invokes_uvicorn_with_settings_port(self) -> None:
+        run_py = Path(__file__).resolve().parents[3] / "run.py"
+        spec = importlib.util.spec_from_file_location("backend_python_app_run", run_py)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        try:
+            with patch.object(module, "uvicorn") as uvicorn_mod, patch.object(
+                module,
+                "get_settings",
+                return_value=Settings(_env_file=None, backend_port=4242),
+            ):
+                module.main()
+        finally:
+            get_settings.cache_clear()
+
+        uvicorn_mod.run.assert_called_once_with(
+            "backend_python_app.main:app",
+            host="127.0.0.1",
+            port=4242,
+            reload=False,
         )

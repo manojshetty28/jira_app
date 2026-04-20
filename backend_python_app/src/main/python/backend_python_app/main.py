@@ -1,6 +1,7 @@
 """FastAPI application for serving the gold price endpoint."""
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend_python_app.config import Settings, get_settings
@@ -11,6 +12,14 @@ app = FastAPI(
     title="Gold Price Backend",
     version="1.0.0",
     description="Minimal FastAPI service for retrieving the latest gold price from Metals.dev.",
+)
+
+# Allow the React client (Vite dev server or nginx-served build) to call the API cross-origin.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
 
 
