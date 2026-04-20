@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchGoldPrice } from '../services/goldApi'
 
 const REFRESH_INTERVAL_MS = 60_000
@@ -39,10 +39,16 @@ export default function GoldPricePanel() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
+  const [refreshError, setRefreshError] = useState(null)
   const [isSetupRequired, setIsSetupRequired] = useState(false)
   const [setupHint, setSetupHint] = useState('')
+  const quoteRef = useRef(null)
+  const isFetchingRef = useRef(false)
 
   const loadQuote = useCallback(async ({ silent = false } = {}) => {
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+
     if (silent) {
       setRefreshing(true)
     } else {
@@ -51,15 +57,32 @@ export default function GoldPricePanel() {
 
     try {
       const data = await fetchGoldPrice()
+      quoteRef.current = data
       setQuote(data)
       setError(null)
+      setRefreshError(null)
       setIsSetupRequired(false)
       setSetupHint('')
     } catch (err) {
-      setError(err.message)
-      setIsSetupRequired(err.code === 'METALS_DEV_API_KEY_MISSING')
-      setSetupHint(err.setupHint || '')
+      const message = err?.message || 'Unable to load live gold price.'
+      const setupRequired = err?.code === 'METALS_DEV_API_KEY_MISSING'
+
+      setIsSetupRequired(setupRequired)
+      setSetupHint(err?.setupHint || '')
+
+      if (setupRequired) {
+        quoteRef.current = null
+        setQuote(null)
+        setError(message)
+        setRefreshError(null)
+      } else if (silent && quoteRef.current) {
+        setRefreshError(message)
+      } else {
+        setError(message)
+        setRefreshError(null)
+      }
     } finally {
+      isFetchingRef.current = false
       setLoading(false)
       setRefreshing(false)
     }
@@ -79,8 +102,12 @@ export default function GoldPricePanel() {
     }
   }, [loadQuote])
 
-  const isPositive = (quote?.change ?? 0) >= 0
-  const movementClass = isPositive ? 'gold-price-panel__change--up' : 'gold-price-panel__change--down'
+  const movementClass =
+    typeof quote?.change !== 'number'
+      ? 'gold-price-panel__change--neutral'
+      : quote.change >= 0
+        ? 'gold-price-panel__change--up'
+        : 'gold-price-panel__change--down'
 
   return (
     <section className="gold-price-panel" aria-live="polite">
@@ -125,6 +152,8 @@ export default function GoldPricePanel() {
             <span>Updated {formatUpdatedTime(quote?.timestamp)}</span>
             <span>{quote?.source} | {quote?.unit || 'toz'}</span>
           </div>
+
+          {refreshError && <div className="gold-price-panel__notice">{refreshError} Showing the latest available quote.</div>}
 
           <div className="gold-price-panel__grid">
             <div className="gold-price-panel__stat">
